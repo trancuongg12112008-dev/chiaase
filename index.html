@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Chia Sẻ Màn Hình</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .code-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .code-display .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            letter-spacing: 5px;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .viewer-count {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .viewer-count .count {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: #28a745;
+        }
+
+        .control-btn.muted {
+            background: #dc3545;
+        }
+
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+        }
+
+        .chat-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.own {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .chat-message.other {
+            background: #e9ecef;
+            color: #333;
+            align-self: flex-start;
+        }
+
+        .chat-message .sender {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        .chat-message .text {
+            font-size: 14px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .chat-input-container input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .chat-input-container button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        /* Floating Chat Window */
+        .floating-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .floating-chat.show {
+            display: flex;
+        }
+
+        .floating-chat-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .floating-chat-header .title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .floating-chat-header .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .floating-chat-header .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .floating-chat .chat-messages {
+            height: 300px;
+        }
+
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        .chat-toggle-btn.show {
+            display: flex;
+        }
+
+        .chat-toggle-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Camera overlay */
+        .camera-overlay {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 180px;
+            height: 135px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 10;
+            background: #000;
+        }
+
+        .camera-overlay video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Nhiều camera overlays */
+        .camera-overlay:nth-child(2) {
+            bottom: 160px; /* Đặt camera thứ 2 phía trên */
+        }
+
+        .camera-overlay:nth-child(3) {
+            bottom: 305px; /* Đặt camera thứ 3 phía trên nữa */
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .control-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .code-display .code {
+                font-size: 24px;
+                letter-spacing: 3px;
+            }
+
+            .viewer-count {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .viewer-count .count {
+                font-size: 20px;
+            }
+
+            .chat-container {
+                height: 250px;
+            }
+
+            .chat-messages {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .chat-message {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+
+            .chat-input-container {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .chat-input-container input {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .chat-input-container button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .camera-overlay {
+                width: 120px;
+                height: 90px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .camera-overlay:nth-child(2) {
+                bottom: 110px;
+            }
+
+            .floating-chat {
+                width: 100%;
+                max-width: 100%;
+                height: 100%;
+                max-height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+
+            .chat-toggle-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .chat-toggle-btn .badge {
+                width: 20px;
+                height: 20px;
+                font-size: 11px;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .container {
+                padding: 15px;
+            }
+
+            .chat-container {
+                height: 200px;
+            }
+
+            .controls {
+                flex-direction: row;
+            }
+
+            .control-btn {
+                flex: 1;
+            }
+        }
+
+        /* Touch-friendly */
+        @media (hover: none) and (pointer: coarse) {
+            button, .control-btn, .tab {
+                min-height: 44px; /* iOS recommended touch target */
+            }
+
+            input {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ Chia Sẻ Màn Hình</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('share')">Chia Sẻ</button>
+            <button class="tab" onclick="switchTab('view')">Xem</button>
+        </div>
+
+        <!-- Tab Chia Sẻ -->
+        <div id="share-tab" class="tab-content active">
+            <div id="share-setup">
+                <div class="input-group">
+                    <label for="host-name-input">Tên của bạn:</label>
+                    <input type="text" id="host-name-input" placeholder="Nhập tên của bạn" maxlength="20">
+                </div>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Nhấn nút bên dưới để bắt đầu chia sẻ màn hình của bạn
+                </p>
+                <button onclick="startSharing()">Bắt Đầu Chia Sẻ</button>
+            </div>
+
+            <div id="share-active" class="hidden">
+                <div class="status success">
+                    ✓ Đang chia sẻ màn hình
+                </div>
+                <div class="status info">
+                    ⚠️ <strong>Demo Mode:</strong> Người xem phải mở trên <strong>cùng thiết bị này</strong> (mở tab mới). 
+                    Không thể xem từ điện thoại/máy khác.
+                </div>
+                <div class="code-display">
+                    <p style="margin-bottom: 10px; color: #666;">Mã chia sẻ của bạn:</p>
+                    <div class="code" id="share-code">----</div>
+                    <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                        📱 Để xem từ thiết bị khác, cần deploy lên server
+                    </p>
+                </div>
+                <div class="viewer-count">
+                    <span>👥 Người đang xem:</span>
+                    <span class="count" id="viewer-count">0</span>
+                </div>
+                <div class="video-container">
+                    <video id="local-video" autoplay muted></video>
+                </div>
+                <div class="controls">
+                    <button class="control-btn" id="mic-btn-host" onclick="toggleMicrophone('host')">
+                        🎤 Bật Micro
+                    </button>
+                    <button class="control-btn" id="cam-btn-host" onclick="toggleCamera('host')">
+                        📹 Bật Camera
+                    </button>
+                    <button class="control-btn" id="float-chat-btn-host" onclick="openChatPopup()">
+                        💬 Mở Chat Popup
+                    </button>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-header">💬 Chat</div>
+                    <div class="chat-messages" id="chat-messages-host"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input-host" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendMessage('host')">
+                        <button onclick="sendMessage('host')">Gửi</button>
+                    </div>
+                </div>
+                <button onclick="stopSharing()" style="margin-top: 20px; background: #dc3545;">
+                    Dừng Chia Sẻ
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Xem -->
+        <div id="view-tab" class="tab-content">
+            <div id="view-setup">
+                <div class="status info">
+                    ⚠️ <strong>Lưu ý:</strong> Hiện tại chỉ hoạt động trên <strong>cùng một thiết bị</strong> (demo mode). 
+                    Để xem từ thiết bị khác, cần deploy lên server với WebSocket.
+                </div>
+                <div class="input-group">
+                    <label for="viewer-name-input">Tên của bạn:</label>
+                    <input type="text" id="viewer-name-input" placeholder="Nhập tên của bạn" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <label for="code-input">Nhập mã chia sẻ:</label>
+                    <input type="text" id="code-input" placeholder="Nhập mã 4 chữ số" maxlength="4">
+                </div>
+                <button onclick="joinSession()">Kết Nối</button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 14px;">
+                    <strong>💡 Cách test trên cùng thiết bị:</strong><br>
+                    1. Mở tab mới (Ctrl+T)<br>
+                    2. Mở lại file index.html<br>
+                    3. Tab 1: Chia sẻ → Lấy mã<br>
+                    4. Tab 2: Xem → Nhập mã
+                </div>
+            </div>
+
+            <div id="view-active" class="hidden">
+                <div class="status success">
+                    ✓ Đã kết nối
+                </div>
+                <div class="video-container">
+                    <video id="remote-video" autoplay></video>
+                </div>
+                <div class="controls">
+                    <button class="control-btn" id="mic-btn-viewer" onclick="toggleMicrophone('viewer')">
+                        🎤 Bật Micro
+                    </button>
+                    <button class="control-btn" id="cam-btn-viewer" onclick="toggleCamera('viewer')">
+                        📹 Bật Camera
+                    </button>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-header">💬 Chat</div>
+                    <div class="chat-messages" id="chat-messages-viewer"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input-viewer" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendMessage('viewer')">
+                        <button onclick="sendMessage('viewer')">Gửi</button>
+                    </div>
+                </div>
+                <button onclick="leaveSession()" style="margin-top: 20px; background: #dc3545;">
+                    Ngắt Kết Nối
+                </button>
+            </div>
+
+            <div id="view-status" class="hidden"></div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Window -->
+    <div id="floating-chat" class="floating-chat">
+        <div class="floating-chat-header">
+            <div class="title">
+                💬 Chat
+                <span id="unread-badge" style="display: none; background: #dc3545; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px;">0</span>
+            </div>
+            <button class="close-btn" onclick="toggleFloatingChat()">×</button>
+        </div>
+        <div class="chat-messages" id="floating-chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="floating-chat-input" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendFloatingMessage()">
+            <button onclick="sendFloatingMessage()">Gửi</button>
+        </div>
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn" onclick="toggleFloatingChat()">
+        💬
+        <span id="chat-badge" class="badge" style="display: none;">0</span>
+    </button>
+
+    <script>
+        // Cấu hình WebRTC
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        let localStream = null;
+        let peerConnection = null;
+        let sessionCode = null;
+        let isSharing = false;
+        let viewerCountInterval = null;
+        let audioStream = null;
+        let isMicOn = false;
+        let chatCheckInterval = null;
+        let userRole = null; // 'host' hoặc 'viewer'
+        let userName = ''; // Tên người dùng
+        let cameraStream = null;
+        let isCameraOn = false;
+        let isFloatingChatOpen = false;
+        let unreadMessages = 0;
+
+        // Chuyển tab
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'share') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('share-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('view-tab').classList.add('active');
+            }
+        }
+
+        // Tạo mã ngẫu nhiên 4 chữ số
+        function generateCode() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
+        // Bắt đầu chia sẻ màn hình
+        async function startSharing() {
+            // Lấy tên người dùng
+            const nameInput = document.getElementById('host-name-input').value.trim();
+            if (!nameInput) {
+                alert('Vui lòng nhập tên của bạn');
+                return;
+            }
+            userName = nameInput;
+
+            try {
+                // Yêu cầu quyền chia sẻ màn hình
+                localStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: {
+                        cursor: 'always'
+                    },
+                    audio: false
+                });
+
+                // Hiển thị video local
+                document.getElementById('local-video').srcObject = localStream;
+
+                // Tạo mã chia sẻ
+                sessionCode = generateCode();
+                document.getElementById('share-code').textContent = sessionCode;
+
+                // Lưu thông tin session vào localStorage (giả lập server)
+                const sessionData = {
+                    code: sessionCode,
+                    timestamp: Date.now(),
+                    active: true
+                };
+                localStorage.setItem(`session_${sessionCode}`, JSON.stringify(sessionData));
+
+                // Chuyển giao diện
+                document.getElementById('share-setup').classList.add('hidden');
+                document.getElementById('share-active').classList.remove('hidden');
+                isSharing = true;
+
+                // Lắng nghe sự kiện dừng chia sẻ
+                localStream.getVideoTracks()[0].onended = () => {
+                    stopSharing();
+                };
+
+                // Bắt đầu lắng nghe yêu cầu kết nối
+                startListeningForConnections();
+
+                // Bắt đầu cập nhật số lượng người xem
+                startViewerCountUpdate();
+
+                // Thiết lập role và bắt đầu chat
+                userRole = 'host';
+                startChatSync();
+
+                // Hiển thị nút chat nổi
+                document.getElementById('chat-toggle-btn').classList.add('show');
+
+            } catch (error) {
+                alert('Không thể chia sẻ màn hình: ' + error.message);
+            }
+        }
+
+        // Bật/tắt camera
+        async function toggleCamera(role) {
+            const btnId = role === 'host' ? 'cam-btn-host' : 'cam-btn-viewer';
+            const btn = document.getElementById(btnId);
+
+            if (!isCameraOn) {
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: false 
+                    });
+
+                    console.log('Camera stream created:', cameraStream.id);
+
+                    // Hiển thị camera của mình (preview)
+                    const videoId = role === 'host' ? 'local-video' : 'remote-video';
+                    const videoContainer = document.getElementById(videoId)?.parentElement;
+                    if (videoContainer) {
+                        const cameraOverlay = document.createElement('div');
+                        cameraOverlay.className = 'camera-overlay';
+                        cameraOverlay.id = `camera-overlay-self-${role}`;
+                        cameraOverlay.style.bottom = '15px';
+                        cameraOverlay.style.left = '15px'; // Bên trái để phân biệt với camera người khác
+                        cameraOverlay.style.right = 'auto';
+                        
+                        const cameraVideo = document.createElement('video');
+                        cameraVideo.autoplay = true;
+                        cameraVideo.muted = true;
+                        cameraVideo.srcObject = cameraStream;
+                        
+                        cameraOverlay.appendChild(cameraVideo);
+                        videoContainer.appendChild(cameraOverlay);
+                    }
+
+                    // Thêm camera track vào peer connection
+                    if (peerConnection && peerConnection.connectionState !== 'closed') {
+                        const sender = peerConnection.addTrack(cameraStream.getVideoTracks()[0], cameraStream);
+                        console.log('Added camera track to peer connection:', sender.track.label);
+                        
+                        // Lưu sender để có thể remove sau
+                        if (!window.cameraSenders) window.cameraSenders = [];
+                        window.cameraSenders.push(sender);
+                    } else {
+                        console.warn('Peer connection not ready');
+                    }
+
+                    isCameraOn = true;
+                    btn.classList.add('active');
+                    btn.innerHTML = '📹 Tắt Camera';
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    alert('Không thể truy cập camera: ' + error.message);
+                }
+            } else {
+                if (cameraStream) {
+                    // Stop tất cả tracks trước
+                    cameraStream.getTracks().forEach(track => {
+                        console.log('Stopping camera track:', track.label);
+                        track.stop();
+                    });
+
+                    // Xóa camera tracks khỏi peer connection
+                    if (peerConnection) {
+                        const senders = peerConnection.getSenders();
+                        senders.forEach(sender => {
+                            if (sender.track && cameraStream.getVideoTracks().includes(sender.track)) {
+                                console.log('Removing camera track from peer connection');
+                                peerConnection.removeTrack(sender);
+                            }
+                        });
+                    }
+
+                    cameraStream = null;
+                }
+
+                // Xóa camera overlay của mình
+                const cameraOverlay = document.getElementById(`camera-overlay-self-${role}`);
+                if (cameraOverlay) {
+                    console.log('Removing self camera overlay');
+                    cameraOverlay.remove();
+                }
+
+                // Thông báo cho peer rằng camera đã tắt
+                localStorage.setItem(`camera_off_${sessionCode}_${role}`, Date.now().toString());
+
+                isCameraOn = false;
+                btn.classList.remove('active');
+                btn.innerHTML = '📹 Bật Camera';
+            }
+        }
+
+        // Hiển thị camera overlay từ remote stream
+        function showRemoteCameraOverlay(stream, role) {
+            // role ở đây là role của người gửi camera
+            const videoId = role === 'host' ? 'remote-video' : 'local-video'; // Ngược lại
+            const videoContainer = document.getElementById(videoId)?.parentElement;
+            
+            if (!videoContainer) return;
+
+            // Xóa overlay cũ nếu có
+            const oldOverlay = document.getElementById(`camera-overlay-remote-${role}`);
+            if (oldOverlay) {
+                oldOverlay.remove();
+            }
+
+            // Tạo camera overlay mới
+            const cameraOverlay = document.createElement('div');
+            cameraOverlay.className = 'camera-overlay';
+            cameraOverlay.id = `camera-overlay-remote-${role}`;
+            
+            const cameraVideo = document.createElement('video');
+            cameraVideo.autoplay = true;
+            cameraVideo.muted = true;
+            cameraVideo.srcObject = stream;
+            
+            cameraOverlay.appendChild(cameraVideo);
+            videoContainer.appendChild(cameraOverlay);
+        }
+
+        // Xóa camera overlay từ remote
+        function removeRemoteCameraOverlay(role) {
+            const overlay = document.getElementById(`camera-overlay-remote-${role}`);
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        // Mở chat trong cửa sổ popup
+        let chatPopupWindow = null;
+        let popupCheckInterval = null;
+
+        function openChatPopup() {
+            if (!sessionCode) {
+                alert('Vui lòng bắt đầu chia sẻ trước');
+                return;
+            }
+
+            // Đóng popup cũ nếu có
+            if (chatPopupWindow && !chatPopupWindow.closed) {
+                chatPopupWindow.focus();
+                return;
+            }
+
+            // Tạo HTML cho popup
+            const popupHTML = `
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - ${sessionCode}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: white;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .chat-message.own {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chat-message.other {
+            background: #e9ecef;
+            color: #333;
+            align-self: flex-start;
+        }
+        .chat-message .sender {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+        .chat-message .text {
+            font-size: 14px;
+        }
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+        .chat-input-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .chat-input-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .chat-input-container button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .chat-input-container button:hover {
+            opacity: 0.9;
+        }
+        .unread-badge {
+            background: #dc3545;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <div>💬 Chat - Mã: ${sessionCode}</div>
+        <div id="unread-count" class="unread-badge" style="display: none;">0</div>
+    </div>
+    <div class="chat-messages" id="popup-chat-messages"></div>
+    <div class="chat-input-container">
+        <input type="text" id="popup-chat-input" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendPopupMessage()">
+        <button onclick="sendPopupMessage()">Gửi</button>
+    </div>
+
+    <script>
+        const sessionCode = '${sessionCode}';
+        const userName = '${userName}';
+        const userRole = '${userRole}';
+        let lastMessageId = 0;
+
+        // Gửi tin nhắn
+        function sendPopupMessage() {
+            const input = document.getElementById('popup-chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatMessage = {
+                id: Date.now() + Math.random(),
+                sender: userName || 'User',
+                text: message,
+                timestamp: Date.now(),
+                role: userRole
+            };
+
+            const messages = JSON.parse(localStorage.getItem('chat_' + sessionCode) || '[]');
+            messages.push(chatMessage);
+            localStorage.setItem('chat_' + sessionCode, JSON.stringify(messages));
+
+            displayMessage(chatMessage);
+            input.value = '';
+        }
+
+        // Hiển thị tin nhắn
+        function displayMessage(message) {
+            const messagesDiv = document.getElementById('popup-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ' + (message.role === userRole ? 'own' : 'other');
+            messageDiv.setAttribute('data-message-id', message.id);
+
+            if (messagesDiv.querySelector('[data-message-id="' + message.id + '"]')) {
+                return;
+            }
+
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'sender';
+            senderDiv.textContent = message.sender;
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text';
+            textDiv.textContent = message.text;
+
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(textDiv);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Đồng bộ tin nhắn
+        function syncMessages() {
+            const messages = JSON.parse(localStorage.getItem('chat_' + sessionCode) || '[]');
+            const newMessages = messages.filter(m => m.id > lastMessageId);
+
+            newMessages.forEach(message => {
+                displayMessage(message);
+                lastMessageId = Math.max(lastMessageId, message.id);
+            });
+        }
+
+        // Load tin nhắn cũ
+        syncMessages();
+
+        // Đồng bộ mỗi giây
+        setInterval(syncMessages, 1000);
+
+        // Thông báo khi đóng
+        window.addEventListener('beforeunload', () => {
+            if (window.opener && !window.opener.closed) {
+                window.opener.chatPopupClosed();
+            }
+        });
+    <\/script>
+</body>
+</html>`;
+
+            // Mở popup
+            chatPopupWindow = window.open('', 'ChatPopup', 'width=400,height=600,left=100,top=100');
+            if (chatPopupWindow) {
+                chatPopupWindow.document.write(popupHTML);
+                chatPopupWindow.document.close();
+
+                // Kiểm tra popup có bị đóng không
+                popupCheckInterval = setInterval(() => {
+                    if (chatPopupWindow && chatPopupWindow.closed) {
+                        clearInterval(popupCheckInterval);
+                        chatPopupWindow = null;
+                    }
+                }, 1000);
+            } else {
+                alert('Không thể mở popup. Vui lòng cho phép popup trong trình duyệt.');
+            }
+        }
+
+        // Callback khi popup đóng
+        function chatPopupClosed() {
+            chatPopupWindow = null;
+            if (popupCheckInterval) {
+                clearInterval(popupCheckInterval);
+                popupCheckInterval = null;
+            }
+        }
+
+        // Toggle floating chat
+        function toggleFloatingChat() {
+            const floatingChat = document.getElementById('floating-chat');
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            
+            isFloatingChatOpen = !isFloatingChatOpen;
+            
+            if (isFloatingChatOpen) {
+                floatingChat.classList.add('show');
+                toggleBtn.style.display = 'none';
+                unreadMessages = 0;
+                updateChatBadge();
+                
+                // Đồng bộ tất cả tin nhắn vào floating chat khi mở
+                syncFloatingChatMessages();
+            } else {
+                floatingChat.classList.remove('show');
+                toggleBtn.style.display = 'flex';
+            }
+        }
+
+        // Đồng bộ tin nhắn vào floating chat
+        function syncFloatingChatMessages() {
+            if (!sessionCode) return;
+            
+            const messages = JSON.parse(localStorage.getItem(`chat_${sessionCode}`) || '[]');
+            const floatingMessagesDiv = document.getElementById('floating-chat-messages');
+            
+            // Xóa tất cả tin nhắn cũ
+            floatingMessagesDiv.innerHTML = '';
+            
+            // Hiển thị lại tất cả tin nhắn
+            messages.forEach(message => {
+                displayFloatingMessage(message);
+            });
+        }
+
+        // Gửi tin nhắn từ floating chat
+        function sendFloatingMessage() {
+            const input = document.getElementById('floating-chat-input');
+            const message = input.value.trim();
+
+            if (!message || !sessionCode) return;
+
+            const chatMessage = {
+                id: Date.now() + Math.random(), // ID unique hơn
+                sender: userName || (userRole === 'host' ? 'Host' : 'Viewer'),
+                text: message,
+                timestamp: Date.now(),
+                role: userRole
+            };
+
+            // Lưu tin nhắn vào localStorage
+            const messages = JSON.parse(localStorage.getItem(`chat_${sessionCode}`) || '[]');
+            messages.push(chatMessage);
+            localStorage.setItem(`chat_${sessionCode}`, JSON.stringify(messages));
+
+            // Hiển thị tin nhắn của mình trong floating chat
+            displayFloatingMessage(chatMessage);
+            
+            // Hiển thị tin nhắn của mình trong chat thường
+            displayMessage(chatMessage, userRole);
+
+            // Xóa input
+            input.value = '';
+        }
+
+        // Hiển thị tin nhắn trong floating chat
+        function displayFloatingMessage(message) {
+            const messagesDiv = document.getElementById('floating-chat-messages');
+
+            if (!messagesDiv) return; // Kiểm tra element tồn tại
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${message.role === userRole ? 'own' : 'other'}`;
+            messageDiv.setAttribute('data-message-id', message.id); // Thêm ID để tránh trùng
+            
+            // Kiểm tra tin nhắn đã tồn tại chưa
+            if (messagesDiv.querySelector(`[data-message-id="${message.id}"]`)) {
+                return; // Tin nhắn đã tồn tại, không thêm nữa
+            }
+
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'sender';
+            senderDiv.textContent = message.sender;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text';
+            textDiv.textContent = message.text;
+
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(textDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            // Scroll xuống cuối
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Cập nhật badge số tin nhắn chưa đọc
+        function updateChatBadge() {
+            const badge = document.getElementById('chat-badge');
+            const unreadBadge = document.getElementById('unread-badge');
+            
+            if (unreadMessages > 0) {
+                badge.textContent = unreadMessages;
+                badge.style.display = 'flex';
+                unreadBadge.textContent = unreadMessages;
+                unreadBadge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+                unreadBadge.style.display = 'none';
+            }
+        }
+
+        // Bật/tắt microphone
+        async function toggleMicrophone(role) {
+            const btnId = role === 'host' ? 'mic-btn-host' : 'mic-btn-viewer';
+            const btn = document.getElementById(btnId);
+
+            if (!isMicOn) {
+                try {
+                    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    
+                    // Thêm audio track vào peer connection nếu đã có
+                    if (peerConnection) {
+                        audioStream.getAudioTracks().forEach(track => {
+                            peerConnection.addTrack(track, audioStream);
+                        });
+                    }
+
+                    isMicOn = true;
+                    btn.classList.add('active');
+                    btn.innerHTML = '🎤 Tắt Micro';
+                } catch (error) {
+                    alert('Không thể truy cập microphone: ' + error.message);
+                }
+            } else {
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                }
+                isMicOn = false;
+                btn.classList.remove('active');
+                btn.innerHTML = '🎤 Bật Micro';
+            }
+        }
+
+        // Gửi tin nhắn chat
+        function sendMessage(role) {
+            const inputId = role === 'host' ? 'chat-input-host' : 'chat-input-viewer';
+            const input = document.getElementById(inputId);
+            const message = input.value.trim();
+
+            if (!message || !sessionCode) return;
+
+            const chatMessage = {
+                id: Date.now() + Math.random(), // ID unique hơn
+                sender: userName || (role === 'host' ? 'Host' : 'Viewer'),
+                text: message,
+                timestamp: Date.now(),
+                role: role
+            };
+
+            // Lưu tin nhắn vào localStorage
+            const messages = JSON.parse(localStorage.getItem(`chat_${sessionCode}`) || '[]');
+            messages.push(chatMessage);
+            localStorage.setItem(`chat_${sessionCode}`, JSON.stringify(messages));
+
+            // Hiển thị tin nhắn của mình trong chat thường
+            displayMessage(chatMessage, role);
+
+            // Hiển thị tin nhắn của mình trong floating chat nếu đang mở
+            if (isFloatingChatOpen) {
+                displayFloatingMessage(chatMessage);
+            }
+
+            // Xóa input
+            input.value = '';
+        }
+
+        // Hiển thị tin nhắn
+        function displayMessage(message, currentRole) {
+            const messagesId = currentRole === 'host' ? 'chat-messages-host' : 'chat-messages-viewer';
+            const messagesDiv = document.getElementById(messagesId);
+
+            if (!messagesDiv) return; // Kiểm tra element tồn tại
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${message.role === currentRole ? 'own' : 'other'}`;
+            messageDiv.setAttribute('data-message-id', message.id); // Thêm ID để tránh trùng
+            
+            // Kiểm tra tin nhắn đã tồn tại chưa
+            if (messagesDiv.querySelector(`[data-message-id="${message.id}"]`)) {
+                return; // Tin nhắn đã tồn tại, không thêm nữa
+            }
+
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'sender';
+            senderDiv.textContent = message.sender;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text';
+            textDiv.textContent = message.text;
+
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(textDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            // Scroll xuống cuối
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Đồng bộ chat
+        function startChatSync() {
+            let lastMessageId = 0;
+            let lastCameraCheck = {};
+
+            chatCheckInterval = setInterval(() => {
+                if (!sessionCode) return;
+
+                const messages = JSON.parse(localStorage.getItem(`chat_${sessionCode}`) || '[]');
+                const newMessages = messages.filter(m => m.id > lastMessageId);
+
+                newMessages.forEach(message => {
+                    // Chỉ hiển thị tin nhắn của người khác
+                    if (message.role !== userRole) {
+                        // Hiển thị trong chat thường (trong container)
+                        displayMessage(message, userRole);
+                        
+                        // Hiển thị trong floating chat nếu đang mở
+                        if (isFloatingChatOpen) {
+                            displayFloatingMessage(message);
+                        } else {
+                            // Tăng số tin nhắn chưa đọc nếu chat nổi đang đóng
+                            unreadMessages++;
+                            updateChatBadge();
+                        }
+                    }
+                    lastMessageId = Math.max(lastMessageId, message.id);
+                });
+
+                // Kiểm tra trạng thái camera của người khác
+                const otherRole = userRole === 'host' ? 'viewer' : 'host';
+                const cameraOffKey = `camera_off_${sessionCode}_${otherRole}`;
+                const cameraOffTime = localStorage.getItem(cameraOffKey);
+                
+                if (cameraOffTime && (!lastCameraCheck[otherRole] || cameraOffTime !== lastCameraCheck[otherRole])) {
+                    console.log('Detected camera off from', otherRole);
+                    lastCameraCheck[otherRole] = cameraOffTime;
+                    removeRemoteCameraOverlay(otherRole);
+                }
+            }, 1000);
+        }
+
+        // Cập nhật số lượng người xem
+        function startViewerCountUpdate() {
+            updateViewerCount();
+            viewerCountInterval = setInterval(updateViewerCount, 2000);
+        }
+
+        function updateViewerCount() {
+            if (!sessionCode) return;
+
+            const viewers = JSON.parse(localStorage.getItem(`viewers_${sessionCode}`) || '[]');
+            const now = Date.now();
+            
+            // Lọc những viewer còn active (trong vòng 5 giây)
+            const activeViewers = viewers.filter(v => now - v.lastSeen < 5000);
+            
+            // Cập nhật lại danh sách
+            localStorage.setItem(`viewers_${sessionCode}`, JSON.stringify(activeViewers));
+            
+            // Hiển thị số lượng
+            document.getElementById('viewer-count').textContent = activeViewers.length;
+        }
+
+        // Dừng chia sẻ
+        function stopSharing() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            if (viewerCountInterval) {
+                clearInterval(viewerCountInterval);
+                viewerCountInterval = null;
+            }
+
+            if (chatCheckInterval) {
+                clearInterval(chatCheckInterval);
+                chatCheckInterval = null;
+            }
+
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+                audioStream = null;
+            }
+
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            // Đóng chat popup nếu có
+            if (chatPopupWindow && !chatPopupWindow.closed) {
+                chatPopupWindow.close();
+                chatPopupWindow = null;
+            }
+            if (popupCheckInterval) {
+                clearInterval(popupCheckInterval);
+                popupCheckInterval = null;
+            }
+
+            // Xóa tất cả camera overlays
+            const cameraOverlays = document.querySelectorAll('.camera-overlay');
+            cameraOverlays.forEach(overlay => overlay.remove());
+
+            if (sessionCode) {
+                localStorage.removeItem(`session_${sessionCode}`);
+                localStorage.removeItem(`offer_${sessionCode}`);
+                localStorage.removeItem(`answer_${sessionCode}`);
+                localStorage.removeItem(`viewers_${sessionCode}`);
+                localStorage.removeItem(`chat_${sessionCode}`);
+                localStorage.removeItem(`ice_host_${sessionCode}`);
+                localStorage.removeItem(`ice_viewer_${sessionCode}`);
+                sessionCode = null;
+            }
+
+            // Ẩn floating chat và xóa tin nhắn
+            document.getElementById('floating-chat').classList.remove('show');
+            document.getElementById('chat-toggle-btn').classList.remove('show');
+            document.getElementById('floating-chat-messages').innerHTML = '';
+            document.getElementById('chat-messages-host').innerHTML = '';
+            isFloatingChatOpen = false;
+            unreadMessages = 0;
+
+            document.getElementById('share-setup').classList.remove('hidden');
+            document.getElementById('share-active').classList.add('hidden');
+            document.getElementById('host-name-input').value = '';
+            isMicOn = false;
+            isCameraOn = false;
+            userRole = null;
+            userName = '';
+            isSharing = false;
+        }
+
+        // Lắng nghe yêu cầu kết nối (giả lập signaling)
+        function startListeningForConnections() {
+            // Tạo offer ngay khi bắt đầu chia sẻ
+            createOfferForSession();
+
+            let answerReceived = false;
+
+            // Lắng nghe answer từ viewer
+            const checkInterval = setInterval(async () => {
+                if (!isSharing) {
+                    clearInterval(checkInterval);
+                    return;
+                }
+
+                const answerData = localStorage.getItem(`answer_${sessionCode}`);
+                if (answerData && peerConnection && peerConnection.signalingState === 'have-local-offer' && !answerReceived) {
+                    answerReceived = true;
+                    const answer = JSON.parse(answerData);
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                    
+                    // Xử lý ICE candidates từ viewer
+                    checkForViewerIceCandidates();
+                }
+
+                // Lắng nghe offer mới từ viewer (khi viewer bật camera)
+                const viewerOfferData = localStorage.getItem(`viewer_offer_${sessionCode}`);
+                if (viewerOfferData && peerConnection && peerConnection.signalingState === 'stable') {
+                    console.log('Host received viewer offer (camera)');
+                    const viewerOffer = JSON.parse(viewerOfferData);
+                    
+                    // Xóa offer cũ để không xử lý lại
+                    localStorage.removeItem(`viewer_offer_${sessionCode}`);
+                    
+                    // Set remote description và tạo answer
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(viewerOffer));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    
+                    // Lưu answer cho viewer
+                    localStorage.setItem(`host_answer_${sessionCode}`, JSON.stringify(answer));
+                }
+            }, 1000);
+        }
+
+        // Tạo offer cho session
+        async function createOfferForSession() {
+            try {
+                peerConnection = new RTCPeerConnection(configuration);
+
+                // Thêm local stream vào peer connection
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Xử lý remote stream từ viewer (camera và audio)
+                peerConnection.ontrack = (event) => {
+                    const track = event.track;
+                    
+                    console.log('Host received track:', track.kind, track.label);
+
+                    if (track.kind === 'video') {
+                        // Camera từ viewer
+                        const viewerCameraStream = new MediaStream([track]);
+                        showRemoteCameraOverlay(viewerCameraStream, 'viewer');
+                    } else if (track.kind === 'audio') {
+                        // Audio từ viewer - phát qua audio element
+                        const audioElement = new Audio();
+                        audioElement.srcObject = new MediaStream([track]);
+                        audioElement.play().catch(e => console.log('Audio play error:', e));
+                    }
+
+                    // Xử lý khi track kết thúc
+                    track.onended = () => {
+                        console.log('Host track ended:', track.kind);
+                        if (track.kind === 'video') {
+                            removeRemoteCameraOverlay('viewer');
+                        }
+                    };
+                };
+
+                // Xử lý ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        const candidates = JSON.parse(localStorage.getItem(`ice_host_${sessionCode}`) || '[]');
+                        candidates.push(event.candidate);
+                        localStorage.setItem(`ice_host_${sessionCode}`, JSON.stringify(candidates));
+                    }
+                };
+
+                // Xử lý negotiation needed (khi thêm track mới)
+                peerConnection.onnegotiationneeded = async () => {
+                    try {
+                        console.log('Host: Negotiation needed');
+                        const offer = await peerConnection.createOffer();
+                        await peerConnection.setLocalDescription(offer);
+                        localStorage.setItem(`offer_${sessionCode}`, JSON.stringify(offer));
+                    } catch (error) {
+                        console.error('Negotiation error:', error);
+                    }
+                };
+
+                // Tạo offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                // Lưu offer
+                localStorage.setItem(`offer_${sessionCode}`, JSON.stringify(offer));
+
+            } catch (error) {
+                console.error('Error creating offer:', error);
+            }
+        }
+
+        // Kiểm tra ICE candidates từ viewer
+        function checkForViewerIceCandidates() {
+            const checkInterval = setInterval(async () => {
+                if (!isSharing) {
+                    clearInterval(checkInterval);
+                    return;
+                }
+
+                const candidates = JSON.parse(localStorage.getItem(`ice_viewer_${sessionCode}`) || '[]');
+                for (const candidate of candidates) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (error) {
+                        console.error('Error adding viewer ICE candidate:', error);
+                    }
+                }
+                
+                if (candidates.length > 0) {
+                    localStorage.setItem(`ice_viewer_${sessionCode}`, JSON.stringify([]));
+                }
+            }, 1000);
+
+            setTimeout(() => clearInterval(checkInterval), 30000);
+        }
+
+        // Tham gia session
+        async function joinSession() {
+            // Lấy tên người dùng
+            const nameInput = document.getElementById('viewer-name-input').value.trim();
+            if (!nameInput) {
+                showStatus('error', 'Vui lòng nhập tên của bạn');
+                return;
+            }
+            userName = nameInput;
+
+            const code = document.getElementById('code-input').value.trim();
+            
+            if (code.length !== 4) {
+                showStatus('error', 'Vui lòng nhập mã 4 chữ số');
+                return;
+            }
+
+            // Kiểm tra session có tồn tại không
+            const sessionData = localStorage.getItem(`session_${code}`);
+            if (!sessionData) {
+                showStatus('error', '❌ Mã không hợp lệ! Lưu ý: Phải mở trên CÙNG THIẾT BỊ với người chia sẻ (demo mode)');
+                return;
+            }
+
+            try {
+                sessionCode = code;
+                
+                // Đợi offer từ host trước
+                showStatus('info', 'Đang kết nối...');
+                await waitForOffer();
+
+                // Chuyển giao diện
+                document.getElementById('view-setup').classList.add('hidden');
+                document.getElementById('view-active').classList.remove('hidden');
+
+                // Thiết lập role và bắt đầu chat
+                userRole = 'viewer';
+                startChatSync();
+
+                // Lắng nghe answer từ host (khi viewer gửi offer mới)
+                startListeningForHostAnswer();
+
+            } catch (error) {
+                showStatus('error', 'Lỗi kết nối: ' + error.message);
+            }
+        }
+
+        // Lắng nghe answer từ host
+        function startListeningForHostAnswer() {
+            const checkInterval = setInterval(async () => {
+                if (!peerConnection || !sessionCode) {
+                    clearInterval(checkInterval);
+                    return;
+                }
+
+                const hostAnswerData = localStorage.getItem(`host_answer_${sessionCode}`);
+                if (hostAnswerData && peerConnection.signalingState === 'have-local-offer') {
+                    console.log('Viewer received host answer');
+                    const hostAnswer = JSON.parse(hostAnswerData);
+                    
+                    // Xóa answer để không xử lý lại
+                    localStorage.removeItem(`host_answer_${sessionCode}`);
+                    
+                    // Set remote description
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(hostAnswer));
+                }
+            }, 1000);
+        }
+
+        // Đợi offer từ host
+        function waitForOffer() {
+            return new Promise((resolve, reject) => {
+                const checkInterval = setInterval(async () => {
+                    const offerData = localStorage.getItem(`offer_${sessionCode}`);
+                    if (offerData) {
+                        clearInterval(checkInterval);
+                        
+                        try {
+                            // Tạo peer connection
+                            peerConnection = new RTCPeerConnection(configuration);
+
+                            // Xử lý remote stream
+                            let remoteVideoStream = new MediaStream();
+                            let videoTrackCount = 0;
+
+                            peerConnection.ontrack = (event) => {
+                                const track = event.track;
+                                const stream = event.streams[0];
+
+                                console.log('Received track:', track.kind, track.label);
+
+                                if (track.kind === 'video') {
+                                    videoTrackCount++;
+                                    
+                                    if (videoTrackCount === 1) {
+                                        // Track đầu tiên là screen share
+                                        remoteVideoStream.addTrack(track);
+                                        document.getElementById('remote-video').srcObject = remoteVideoStream;
+                                    } else {
+                                        // Các track sau là camera
+                                        const cameraStream = new MediaStream([track]);
+                                        showRemoteCameraOverlay(cameraStream, 'host');
+                                    }
+                                } else if (track.kind === 'audio') {
+                                    // Audio track
+                                    remoteVideoStream.addTrack(track);
+                                    const currentSrc = document.getElementById('remote-video').srcObject;
+                                    if (currentSrc) {
+                                        currentSrc.addTrack(track);
+                                    }
+                                }
+
+                                // Xử lý khi track kết thúc
+                                track.onended = () => {
+                                    console.log('Track ended:', track.kind, track.label);
+                                    if (track.kind === 'video' && videoTrackCount > 1) {
+                                        removeRemoteCameraOverlay('host');
+                                    }
+                                };
+                            };
+
+                            // Xử lý ICE candidates
+                            peerConnection.onicecandidate = (event) => {
+                                if (event.candidate) {
+                                    const candidates = JSON.parse(localStorage.getItem(`ice_viewer_${sessionCode}`) || '[]');
+                                    candidates.push(event.candidate);
+                                    localStorage.setItem(`ice_viewer_${sessionCode}`, JSON.stringify(candidates));
+                                }
+                            };
+
+                            // Xử lý negotiation needed (khi viewer thêm camera)
+                            peerConnection.onnegotiationneeded = async () => {
+                                try {
+                                    console.log('Viewer: Negotiation needed');
+                                    const offer = await peerConnection.createOffer();
+                                    await peerConnection.setLocalDescription(offer);
+                                    // Cập nhật answer mới
+                                    const answer = await peerConnection.createAnswer();
+                                    await peerConnection.setLocalDescription(answer);
+                                    localStorage.setItem(`answer_${sessionCode}`, JSON.stringify(answer));
+                                } catch (error) {
+                                    console.error('Viewer negotiation error:', error);
+                                }
+                            };
+
+                            // Set remote description (offer)
+                            const offer = JSON.parse(offerData);
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                            
+                            // Tạo answer
+                            const answer = await peerConnection.createAnswer();
+                            await peerConnection.setLocalDescription(answer);
+
+                            // Lưu answer
+                            localStorage.setItem(`answer_${sessionCode}`, JSON.stringify(answer));
+
+                            // Kiểm tra ICE candidates từ host
+                            checkForHostIceCandidates();
+
+                            // Đăng ký viewer
+                            registerViewer();
+                            
+                            resolve();
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    reject(new Error('Không tìm thấy phiên chia sẻ'));
+                }, 10000);
+            });
+        }
+
+        // Kiểm tra ICE candidates từ host
+        function checkForHostIceCandidates() {
+            const checkInterval = setInterval(async () => {
+                if (!peerConnection) {
+                    clearInterval(checkInterval);
+                    return;
+                }
+
+                const candidates = JSON.parse(localStorage.getItem(`ice_host_${sessionCode}`) || '[]');
+                for (const candidate of candidates) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (error) {
+                        console.error('Error adding host ICE candidate:', error);
+                    }
+                }
+                
+                if (candidates.length > 0) {
+                    localStorage.setItem(`ice_host_${sessionCode}`, JSON.stringify([]));
+                }
+            }, 1000);
+
+            setTimeout(() => clearInterval(checkInterval), 30000);
+        }
+
+        // Đăng ký viewer và cập nhật heartbeat
+        let viewerHeartbeatInterval = null;
+        const viewerId = 'viewer_' + Math.random().toString(36).substr(2, 9);
+
+        function registerViewer() {
+            updateViewerHeartbeat();
+            viewerHeartbeatInterval = setInterval(updateViewerHeartbeat, 2000);
+        }
+
+        function updateViewerHeartbeat() {
+            if (!sessionCode) return;
+
+            const viewers = JSON.parse(localStorage.getItem(`viewers_${sessionCode}`) || '[]');
+            const existingIndex = viewers.findIndex(v => v.id === viewerId);
+            
+            const viewerData = {
+                id: viewerId,
+                lastSeen: Date.now()
+            };
+
+            if (existingIndex >= 0) {
+                viewers[existingIndex] = viewerData;
+            } else {
+                viewers.push(viewerData);
+            }
+
+            localStorage.setItem(`viewers_${sessionCode}`, JSON.stringify(viewers));
+        }
+
+        // Rời khỏi session
+        function leaveSession() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            if (viewerHeartbeatInterval) {
+                clearInterval(viewerHeartbeatInterval);
+                viewerHeartbeatInterval = null;
+            }
+
+            if (chatCheckInterval) {
+                clearInterval(chatCheckInterval);
+                chatCheckInterval = null;
+            }
+
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+                audioStream = null;
+            }
+
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            // Xóa tất cả camera overlays
+            const cameraOverlays = document.querySelectorAll('.camera-overlay');
+            cameraOverlays.forEach(overlay => overlay.remove());
+
+            // Xóa viewer khỏi danh sách
+            if (sessionCode) {
+                const viewers = JSON.parse(localStorage.getItem(`viewers_${sessionCode}`) || '[]');
+                const filtered = viewers.filter(v => v.id !== viewerId);
+                localStorage.setItem(`viewers_${sessionCode}`, JSON.stringify(filtered));
+            }
+
+            document.getElementById('remote-video').srcObject = null;
+            document.getElementById('chat-messages-viewer').innerHTML = '';
+            document.getElementById('view-setup').classList.remove('hidden');
+            document.getElementById('view-active').classList.add('hidden');
+            document.getElementById('code-input').value = '';
+            document.getElementById('viewer-name-input').value = '';
+            isMicOn = false;
+            isCameraOn = false;
+            userRole = null;
+            userName = '';
+            sessionCode = null;
+        }
+
+        // Hiển thị trạng thái
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('view-status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Dọn dẹp khi đóng trang
+        window.addEventListener('beforeunload', () => {
+            if (isSharing) {
+                stopSharing();
+            }
+            if (peerConnection) {
+                leaveSession();
+            }
+        });
+    </script>
+</body>
+</html>
